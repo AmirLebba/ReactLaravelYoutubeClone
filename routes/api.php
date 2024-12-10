@@ -1,7 +1,14 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\VideoController;
+use App\Http\Controllers\UserController;
+use Laravel\Passport\Http\Controllers\AccessTokenController;
+use Laravel\Passport\Http\Controllers\AuthorizationController;
+use Laravel\Passport\Http\Controllers\ApproveAuthorizationController;
+use Laravel\Passport\Http\Controllers\DenyAuthorizationController;
+use Laravel\Passport\Http\Controllers\TransientTokenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,19 +21,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Public routes
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register']);
+Route::get('/videos', [VideoController::class, 'index']);
+Route::get('/videos/{id}', [VideoController::class, 'show']);
+
+// Protected routes (requires authentication)
+Route::middleware('auth:api')->group(function () {
+    Route::post('/videos', [VideoController::class, 'store']);
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
 });
 
-Route::post('/auth/login', 'AuthController@login');
-Route::post('/auth/register', 'AuthController@register');
-
-Route::group(['middleware' => 'auth:api'], function () {
-    // Routes that require authentication
-    Route::post('/videos', 'VideoController@store');
-    Route::get('/users', 'UserController@index');
-    Route::get('/users/{id}', 'UserController@show');
+// OAuth routes
+Route::prefix('oauth')->group(function () {
+    Route::post('/token', [AccessTokenController::class, 'issueToken']);
+    Route::get('/authorize', [AuthorizationController::class, 'authorize']);
+    Route::post('/authorize', [ApproveAuthorizationController::class, 'approve']);
+    Route::delete('/authorize', [DenyAuthorizationController::class, 'deny']);
+    Route::post('/token/refresh', [TransientTokenController::class, 'refresh']);
 });
-
-Route::get('/videos', 'VideoController@index');
-Route::get('/videos/{id}', 'VideoController@show');

@@ -3,24 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Video;
 
 class VideoController extends Controller
 {
     public function index()
     {
-        // Return a list of videos
+        return Video::with('user')->get(); // Include user who uploaded the video
     }
 
     public function show($id)
     {
-        // Return a single video
+        return Video::with('user')->findOrFail($id);
     }
 
     public function store(Request $request)
     {
-        // This method requires authentication
-        $this->middleware('auth:api');
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'url' => 'required|string',
+            'thumbnail' => 'required|string',
+        ]);
 
-        // Upload a new video
+        $video = auth()->user()->videos()->create($validated);
+
+        return response()->json($video, 201);
     }
 }
