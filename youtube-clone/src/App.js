@@ -1,13 +1,14 @@
+import React from 'react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Upload from "./upload/Upload";
 import VideoBrowser from "./Browse/VideoBrowser";
 import VPlayer from "./Player/VPlayer";
+import Register from "./Register/Register";
+import Login from "./Login/Login";  // Import Login component
 import "./App.css";
 import "video.js/dist/video-js.css";
 
-
-// Create the query client instance
 const queryClient = new QueryClient();
 
 function App() {
@@ -23,6 +24,12 @@ function App() {
               <li>
                 <Link to="/upload">Upload Video</Link>
               </li>
+              <li>
+                <Link to="/register">Register</Link>
+              </li>
+              <li>
+                <Link to="/login">Login</Link> {/* Add link to login page */}
+              </li>
             </ul>
           </nav>
         </div>
@@ -31,6 +38,8 @@ function App() {
           <Route path="/" element={<VideoBrowser />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/video/:id" element={<VPlayer />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} /> {/* Add route for login page */}
         </Routes>
       </Router>
     </QueryClientProvider>
