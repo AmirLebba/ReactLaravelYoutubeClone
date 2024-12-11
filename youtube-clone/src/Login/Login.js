@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import styles from "./Login.module.scss"; // Import the SASS module
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,20 +23,23 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8000/api/auth/login', formData);
+      const response = await axios.post(
+        "http://localhost:8000/api/auth/login",
+        formData
+      );
 
       // Store the authentication token
-      localStorage.setItem('authToken', response.data.token);
+      localStorage.setItem("authToken", response.data.token);
 
-      setMessage('Login successful!');
-      navigate('/'); // Redirect to the home page or protected route
+      setMessage("Login successful!");
+      navigate("/"); // Redirect to the home page or protected route
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Login failed.');
+      setMessage(error.response?.data?.message || "Login failed.");
     }
   };
 
   return (
-    <div className="login-container">
+    <div className={styles["login-container"]}>
       <h2>Login</h2>
       {message && <p>{message}</p>}
       <form onSubmit={handleSubmit}>
