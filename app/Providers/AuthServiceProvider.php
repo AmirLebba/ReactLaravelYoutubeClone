@@ -29,10 +29,13 @@ class AuthServiceProvider extends ServiceProvider
             'upload-videos' => 'Upload videos',
         ]);
 
-        
+
 
         // Optional: Set token expiration times
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));
+
+
+        
     }
 }

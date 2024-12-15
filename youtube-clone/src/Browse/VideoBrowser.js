@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./videoBrowser.css"; // Import the CSS file for styles
+import "./videoBrowser.scss"; // Import the CSS file for styles
 
 // Fetch videos from the server
 const fetchVideos = async () => {
@@ -72,13 +72,15 @@ const VideoBrowser = () => {
     <div className="video-grid">
       {videos.map((video) => (
         <div key={video.id} className="video-card">
-          <div onClick={() => handlePlay(video.id)}>
-            <h3 className="video-title">{video.title}</h3>
+          <div className="thumbnail-container" onClick={() => handlePlay(video.id)}>
+            <img src={video.thumbnail} alt={video.title} className="video-thumbnail" />
+            <span className="video-duration">{video.duration || "00:00"}</span>
           </div>
-          <button
-            className="delete-button"
-            onClick={() => handleDelete(video.id)}
-          >
+          <div className="video-info">
+            <h3 className="video-title">{video.title}</h3>
+            <p className="video-description">{video.description}</p>
+          </div>
+          <button className="delete-button" onClick={() => handleDelete(video.id)}>
             Delete
           </button>
         </div>

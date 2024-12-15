@@ -19,15 +19,30 @@ class VideoController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
+            'video' => 'required|file|mimes:mp4,avi,mov',
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'url' => 'required|string',
-            'thumbnail' => 'required|string',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg',
         ]);
 
-        $video = auth()->user()->videos()->create($validated);
+        // Handle video upload
+        $videoPath = $request->file('video')->store('videos');
 
-        return response()->json($video, 201);
+        // Handle thumbnail upload or generation
+        if ($request->hasFile('thumbnail')) {
+            $thumbnailPath = $request->file('thumbnail')->store('thumbnails');
+        } elseif ($request->generateThumbnail === 'true') {
+            $thumbnailPath = $this->generateThumbnail($videoPath); // Use FFmpeg or similar
+        }
+
+        $video = Video::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'url' => $videoPath,
+            'thumbnail' => $thumbnailPath,
+            'user_id' => auth()->id(),
+        ]);
+
+        return response()->json(['message' => 'Video uploaded successfully!', 'video' => $video], 201);
     }
 }
