@@ -8,13 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Video extends Model
 {
     use HasFactory;
+    protected $connection = 'mongodb'; // Use MongoDB
+    protected $collection = 'videos';
 
     protected $fillable = [
         'title',
-        'description',
-        'url',
         'thumbnail',
-        'user_id',
+        'duration',
+        'video_id',
+        'video_owner',
+        'likes',
+        'comments',
+        'storage_link'
     ];
 
     public function user()

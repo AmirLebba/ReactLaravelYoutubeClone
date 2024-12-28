@@ -94,11 +94,11 @@ return [
         ],
         'mongodb' => [
             'driver'   => 'mongodb',
-            'host'     => env('DB_HOST', 'cluster0.mongodb.net'),
+            'host'     => env('DB_HOST', 'mongodb+srv://Amirs_project:22ouPi7sxmMb0jjH@user-data.nyesh.mongodb.net/'),
             'port'     => env('DB_PORT', 27017),
             'database' => env('DB_DATABASE', 'forge'),
-            'username' => env('DB_USERNAME', ''),
-            'password' => env('DB_PASSWORD', ''),
+            'username' => env('Amirs_project', ''),
+            'password' => env('22ouPi7sxmMb0jjH', ''),
             'options'  => [
                 'database' => env('DB_AUTHENTICATION_DATABASE', 'admin'), // Specify the authentication database if needed
             ],
