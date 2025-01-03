@@ -94,7 +94,7 @@ return [
         ],
         'mongodb' => [
             'driver'   => 'mongodb',
-            'host'     => env('DB_HOST', 'mongodb+srv://Amirs_project:22ouPi7sxmMb0jjH@user-data.nyesh.mongodb.net/'),
+            'host'     => env('DB_HOST', ''),
             'port'     => env('DB_PORT', 27017),
             'database' => env('DB_DATABASE', 'forge'),
             'username' => env('Amirs_project', ''),
