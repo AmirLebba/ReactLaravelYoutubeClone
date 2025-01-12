@@ -8,11 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Video extends Model
 {
     use HasFactory;
-    protected $connection = 'mongodb'; // Use MongoDB
+   
     protected $collection = 'videos';
 
+    // Define the table if it's not the default 'videos'
+    protected $table = 'videos';
+
+    // Define the fillable fields
     protected $fillable = [
         'title',
+        'description',
+        'url',
         'thumbnail',
         'duration',
         'video_id',

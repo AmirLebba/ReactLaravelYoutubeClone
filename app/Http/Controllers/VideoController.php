@@ -9,7 +9,12 @@ class VideoController extends Controller
 {
     public function index()
     {
-        return Video::with('user')->get(); // Include user who uploaded the video
+        try {
+            $videos = Video::all();
+            return response()->json($videos);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     }
 
     public function show($id)

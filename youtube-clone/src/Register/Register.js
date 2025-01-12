@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import './Register.scss';
 const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
@@ -36,10 +36,10 @@ const Register = () => {
 
   return (
     <div className="register-container">
-      <h2>Register</h2>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
+      <h2 className="register-title">Register</h2>
+      {message && <p className="register-message">{message}</p>}
+      <form className="register-form" onSubmit={handleSubmit}>
+        <div className="form-group">
           <label>Username:</label>
           <input
             type="text"
@@ -49,7 +49,7 @@ const Register = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Email:</label>
           <input
             type="email"
@@ -59,7 +59,7 @@ const Register = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Password:</label>
           <input
             type="password"
@@ -69,7 +69,7 @@ const Register = () => {
             required
           />
         </div>
-        <div>
+        <div className="form-group">
           <label>Confirm Password:</label>
           <input
             type="password"
@@ -79,7 +79,7 @@ const Register = () => {
             required
           />
         </div>
-        <button type="submit">Register</button>
+        <button className="register-button" type="submit">Register</button>
       </form>
     </div>
   );

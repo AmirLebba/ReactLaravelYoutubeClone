@@ -4,6 +4,16 @@ $hover-color: #ff1a1a;
 $background-light: #fff;
 $text-color: #666;
 
+
+.no-videos-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 50dvh;
+  font-size: 24px;
+  color: $text-color;
+}
 .video-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

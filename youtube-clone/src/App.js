@@ -7,7 +7,7 @@ import VPlayer from "./Player/VPlayer";
 import Register from "./Register/Register";
 import Login from "./Login/Login";
 import ProtectedRoute from "./ProtectRoutes/ProtectRoutes"; // Ensure correct import path
-import Navbar from "./Navbar/Navbar";
+
 import "./App.css";
 import "video.js/dist/video-js.css";
 
@@ -17,7 +17,7 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <Router>
-                <Navbar />
+                
 
                 <Routes>
                     <Route path="/" element={<VideoBrowser />} />
