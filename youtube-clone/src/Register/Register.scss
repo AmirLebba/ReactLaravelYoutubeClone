@@ -1,56 +1,72 @@
-body {
-  background-color: #333; // Dark gray background color
-}
-
 .register-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #e0e0e0;
-}
+    width: 100%;
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
 
-.register-title {
-  text-align: center;
-  margin-bottom: 20px;
-}
+  .register-title {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #333;
+  }
 
-.register-message {
-  text-align: center;
-  color: red;
-  margin-bottom: 20px;
-}
+  .register-message {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: green;
+  }
 
-.register-form {
-  display: flex;
-  flex-direction: column;
-}
+  .register-form .form-group {
+    margin-bottom: 1rem;
+  }
 
-.form-group {
-  margin-bottom: 15px;
-}
+  .register-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+  }
 
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-}
+  .register-form input {
+    width: 95%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
 
-.form-group input {
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-}
+  .register-form .input-error {
+    border-color: #ff4d4d;
+  }
 
-.register-button {
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
+  .error {
+    color: #ff4d4d;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
 
-.register-button:hover {
-  background-color: #0056b3;
-}
+  .register-button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .register-button:disabled {
+    background: #ccc;
+  }
+
+  @media (max-width: 600px) {
+    .register-container {
+      padding: 1rem;
+    }
+  }
