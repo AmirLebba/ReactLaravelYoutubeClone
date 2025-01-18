@@ -9,45 +9,28 @@ class VideoController extends Controller
 {
     public function index()
     {
-        try {
-            $videos = Video::all();
-            return response()->json($videos);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Internal Server Error'], 500);
-        }
-    }
-
-    public function show($id)
-    {
-        return Video::with('user')->findOrFail($id);
+        $videos = Video::all();
+        return response()->json($videos);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'video' => 'required|file|mimes:mp4,avi,mov',
             'title' => 'required|string|max:255',
-            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg',
+            'description' => 'required|string',
+            'url' => 'required|string', // Assuming the URL is passed as a string
+            'thumbnail' => 'required|string', // Assuming the thumbnail is passed as a string
         ]);
 
-        // Handle video upload
-        $videoPath = $request->file('video')->store('videos');
-
-        // Handle thumbnail upload or generation
-        if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('thumbnails');
-        } elseif ($request->generateThumbnail === 'true') {
-            $thumbnailPath = $this->generateThumbnail($videoPath); // Use FFmpeg or similar
-        }
-
+        // Use the authenticated user's ID
         $video = Video::create([
             'title' => $request->title,
             'description' => $request->description,
-            'url' => $videoPath,
-            'thumbnail' => $thumbnailPath,
-            'user_id' => auth()->id(),
+            'url' => $request->url,
+            'thumbnail' => $request->thumbnail,
+            'user_id' => auth()->id(), // Get the authenticated user's ID
         ]);
 
-        return response()->json(['message' => 'Video uploaded successfully!', 'video' => $video], 201);
+        return response()->json($video, 201);
     }
 }
