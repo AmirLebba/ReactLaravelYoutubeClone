@@ -103,7 +103,7 @@ textarea {
 }
 
 .thumbnail-section {
-    
+
     margin-top: 15px;
 }
 
@@ -125,4 +125,15 @@ textarea {
 
 .generate-thumbnail-button:hover {
     background-color: #218838;
+}
+
+.form-group video {
+
+    max-height: 300px;
+    margin-bottom: 10px;
+}
+.thumbnail-section video {
+   
+    max-height: 300px;
+    margin-bottom: 10px;
 }

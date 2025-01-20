@@ -13,17 +13,40 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
+        // Validate request inputs
+        $validator = Validator::make($credentials, [
+            'email' => 'required|email',
+            'password' => 'required|string|min:8',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Attempt authentication
         if (!auth()->attempt($credentials)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
         $user = auth()->user();
 
-        // Generate a token for the authenticated user
-        $token = $user->createToken('API Token')->accessToken;
+        try {
+            // Generate token
+            $token = $user->createToken('API Token')->accessToken;
 
-        return response()->json(['token' => $token]);
+
+            return response()->json([
+                'message' => 'Login successful',
+                'token' => $token,
+                'user' => $user
+            ]);
+        } catch (\Exception $e) {
+            // Log error and return response
+            // Log::error('Token generation failed: ' . $e->getMessage());
+            return response()->json(['message' => 'An error occurred. Please try again.'], 500);
+        }
     }
+
 
     public function register(Request $request)
     {
@@ -45,10 +68,10 @@ class AuthController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'avatar' => 'https://reedbarger.nyc3.digitaloceanspaces.com/default-avatar.png',  // Default avatar
-            'cover' => 'https://reedbarger.nyc3.digitaloceanspaces.com/default-cover-banner.png',  // Default cover image
-            'about' => '',  // Default about text
-            'social_links' => json_encode([]),  // Empty social links
+            'avatar' => 'https://reedbarger.nyc3.digitaloceanspaces.com/default-avatar.png',
+            'cover' => 'https://reedbarger.nyc3.digitaloceanspaces.com/default-cover-banner.png',
+            'about' => '',
+            'social_links' => json_encode([]),
         ]);
 
         // Return the created user

@@ -16,4 +16,8 @@ class UserController extends Controller
     {
         return User::findOrFail($id);
     }
+    public function showAuthenticatedUser(Request $request)
+    {
+        return response()->json($request->user());
+    }
 }

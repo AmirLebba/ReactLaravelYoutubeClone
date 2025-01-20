@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            $table->unsignedBigInteger('id')->unique(); // Custom unique identifier
             $table->string('username')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -22,7 +22,10 @@ return new class extends Migration
             $table->text('about')->default('');
             $table->json('social_links')->nullable();
             $table->timestamps();
+
+            $table->primary('id'); // Set the custom id as the primary key
         });
+
     }
 
     /**

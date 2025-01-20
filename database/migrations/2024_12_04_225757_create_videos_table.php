@@ -16,10 +16,11 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('url');
-            $table->string('thumbnail');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('thumbnail')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Foreign key
             $table->timestamps();
         });
+
     }
 
     /**

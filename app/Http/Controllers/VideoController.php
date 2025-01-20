@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Video;
+use Illuminate\Support\Facades\Auth;
 
 class VideoController extends Controller
 {
@@ -17,18 +18,20 @@ class VideoController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'url' => 'required|string', // Assuming the URL is passed as a string
-            'thumbnail' => 'required|string', // Assuming the thumbnail is passed as a string
+            'description' => 'nullable|string',
+            'video' => 'required|file|mimes:mp4,avi,mov|max:20480', // Example validation
+            'thumbnail' => 'nullable|file|mimes:jpeg,png|max:2048',
         ]);
 
-        // Use the authenticated user's ID
+        $path = $request->file('video')->store('videos', 'public');
+        $thumbnailPath = $request->file('thumbnail') ? $request->file('thumbnail')->store('thumbnails', 'public') : null;
+
         $video = Video::create([
             'title' => $request->title,
             'description' => $request->description,
-            'url' => $request->url,
-            'thumbnail' => $request->thumbnail,
-            'user_id' => auth()->id(), // Get the authenticated user's ID
+            'url' => $path,
+            'thumbnail' => $thumbnailPath,
+            'user_id' => Auth::id(), // Automatically assign the authenticated user's ID
         ]);
 
         return response()->json($video, 201);

@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
@@ -22,17 +23,21 @@ use Laravel\Passport\Http\Controllers\TransientTokenController;
 */
 
 // Public routes
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::get('/videos', [VideoController::class, 'index']);
-Route::get('/videos/{id}', [VideoController::class, 'show']);
+Route::post('auth/register', [AuthController::class, 'register']);
+Route::post('auth/login', [AuthController::class, 'login']);
+Route::get('videos', [VideoController::class, 'index']);
 
 // Protected routes (requires authentication)
 Route::middleware('auth:api')->group(function () {
-    Route::post('/videos', [VideoController::class, 'store']);
+    Route::post('videos', [VideoController::class, 'store']);
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
 });
+Route::middleware('auth:api')->get('/user', function (Request $request) {
+    return $request->user();
+});
+Route::middleware('auth:api')->get('/authenticated-user', [UserController::class, 'showAuthenticatedUser']);
+
 
 // OAuth routes
 Route::prefix('oauth')->group(function () {
