@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Handles unsigned and foreign key constraint
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('url');
             $table->string('thumbnail')->nullable();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Foreign key
             $table->timestamps();
         });
+
 
     }
 

@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
-import useAuthenticatedUser from "./useAuthenticatedUser";
 import "./Upload.scss";
 
 const Upload = () => {
@@ -11,55 +10,68 @@ const Upload = () => {
     const [description, setDescription] = useState("");
     const [progress, setProgress] = useState(0);
     const [message, setMessage] = useState("");
+
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
 
-    const user = useAuthenticatedUser();
-
     const handleGenerateThumbnail = () => {
-        if (!videoRef.current) return;
+        if (!videoRef.current || !canvasRef.current) {
+            console.error("Video or canvas reference is missing.");
+            return;
+        }
 
         const video = videoRef.current;
         const canvas = canvasRef.current;
         const context = canvas.getContext("2d");
 
-        const width = 320;
-        const height = (video.videoHeight / video.videoWidth) * width;
+        const width = 320; // Thumbnail width
+        const height = (video.videoHeight / video.videoWidth) * width; // Maintain aspect ratio
         canvas.width = width;
         canvas.height = height;
 
         context.drawImage(video, 0, 0, width, height);
 
-        canvas.toBlob((blob) => {
-            setThumbnail(blob);
-        }, "image/jpeg");
+        canvas.toBlob(
+            (blob) => {
+                if (blob) {
+                    setThumbnail(blob);
+                } else {
+                    console.error("Failed to generate thumbnail blob.");
+                }
+            },
+            "image/jpeg",
+            0.9 // Quality (optional)
+        );
     };
 
     const handleUpload = async (e) => {
         e.preventDefault();
 
         const token = localStorage.getItem("authToken");
-        const user = JSON.parse(localStorage.getItem("user")); // Retrieve user from localStorage
+        const user = JSON.parse(localStorage.getItem("user"));
 
-        if (!token) {
+        if (!token || !user || !user.id) {
             setMessage("You must be logged in to upload a video.");
             return;
         }
 
-        if (!user || !user.id) {
-            setMessage("User information is missing. Please log in again.");
+        if (!thumbnail) {
+            setMessage("Thumbnail is not generated.");
             return;
         }
 
         const formData = new FormData();
         formData.append("video", file);
-        formData.append("title", title);
-        formData.append("description", description);
+        formData.append("title", title || ""); // Default empty title
+        formData.append("description", description || ""); // Default empty description
         formData.append("user_id", user.id);
+        formData.append("thumbnail", thumbnail, "thumbnail.jpg");
 
-        if (thumbnail) {
-            formData.append("thumbnail", thumbnail, "thumbnail.jpg");
-        }
+        const metadata = {
+            title: title || "",
+            description: description || "",
+        };
+        formData.append("metadata", JSON.stringify(metadata));
 
         try {
             const response = await axios.post(
@@ -80,12 +92,7 @@ const Upload = () => {
             );
 
             setMessage("Video uploaded successfully!");
-            setFile(null);
-            setThumbnail(null);
-            setTitle("");
-            setDescription("");
-            setProgress(0);
-            setStep(1);
+            resetForm();
         } catch (error) {
             console.error(
                 "Error response:",
@@ -95,6 +102,15 @@ const Upload = () => {
                 error.response?.data?.message || "Error uploading video."
             );
         }
+    };
+
+    const resetForm = () => {
+        setFile(null);
+        setThumbnail(null);
+        setTitle("");
+        setDescription("");
+        setProgress(0);
+        setStep(1);
     };
 
     const renderStep = () => {

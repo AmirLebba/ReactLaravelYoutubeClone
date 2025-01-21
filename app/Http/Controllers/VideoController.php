@@ -16,22 +16,28 @@ class VideoController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
+        $validated = $request->validate([
+            'video' => 'required|file|mimes:mp4,mov,avi|max:90240',
+            'title' => 'nullable|string',
             'description' => 'nullable|string',
-            'video' => 'required|file|mimes:mp4,avi,mov|max:20480', // Example validation
-            'thumbnail' => 'nullable|file|mimes:jpeg,png|max:2048',
+            'thumbnail' => 'nullable|image|max:2048', // Ensure this is validated
         ]);
 
+        // Store video file
         $path = $request->file('video')->store('videos', 'public');
-        $thumbnailPath = $request->file('thumbnail') ? $request->file('thumbnail')->store('thumbnails', 'public') : null;
 
+        // Store thumbnail file, if present
+        $thumbnailPath = $request->file('thumbnail')
+            ? $request->file('thumbnail')->store('thumbnails', 'public')
+            : null;
+
+        // Create video record
         $video = Video::create([
-            'title' => $request->title,
-            'description' => $request->description,
+            'title' => $validated['title'] ?? null,
+            'description' => $validated['description'] ?? null,
             'url' => $path,
-            'thumbnail' => $thumbnailPath,
-            'user_id' => Auth::id(), // Automatically assign the authenticated user's ID
+            'thumbnail' => $thumbnailPath, // Save the thumbnail path
+            'user_id' => Auth::id(),
         ]);
 
         return response()->json($video, 201);
