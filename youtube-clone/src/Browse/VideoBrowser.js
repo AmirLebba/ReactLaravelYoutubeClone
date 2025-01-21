@@ -98,8 +98,10 @@ const VideoBrowser = () => {
                             className="thumbnail-container"
                             onClick={() => handlePlay(video.id)}
                         >
+                            {console.log(video.thumbnail)}
                             <img
                                 src={video.thumbnail}
+
                                 alt={video.title}
                                 className="video-thumbnail"
                             />
