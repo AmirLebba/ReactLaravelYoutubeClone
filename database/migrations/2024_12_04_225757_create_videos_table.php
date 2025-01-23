@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
+            $table->string('publisher_name')->nullable();
+            $table->integer('views')->default(0);
+            $table->time('duration')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Handles unsigned and foreign key constraint
             $table->string('title');
             $table->text('description')->nullable();
@@ -20,8 +23,6 @@ return new class extends Migration
             $table->string('thumbnail')->nullable();
             $table->timestamps();
         });
-
-
     }
 
     /**

@@ -14,6 +14,10 @@ class Video extends Model
         'description',
         'url',
         'thumbnail',
-        'user_id', // Add this to allow mass assignment
+        'user_id',
+        'publisher_name',
+        'views',
+        'duration',
     ];
+
 }

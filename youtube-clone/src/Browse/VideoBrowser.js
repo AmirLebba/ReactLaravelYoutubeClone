@@ -98,9 +98,9 @@ const VideoBrowser = () => {
                             className="thumbnail-container"
                             onClick={() => handlePlay(video.id)}
                         >
-                            {console.log(video.thumbnail)}
+
                             <img
-                                src={video.thumbnail}
+                                src={`data:image/jpeg;base64,${video.thumbnail}`}
 
                                 alt={video.title}
                                 className="video-thumbnail"
@@ -115,12 +115,7 @@ const VideoBrowser = () => {
                                 {video.description}
                             </p>
                         </div>
-                        <button
-                            className="delete-button"
-                            onClick={() => handleDelete(video.id)}
-                        >
-                            Delete
-                        </button>
+                        
                     </div>
                 ))}
             </div>
