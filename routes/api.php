@@ -26,6 +26,10 @@ use Laravel\Passport\Http\Controllers\TransientTokenController;
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
 Route::get('videos', [VideoController::class, 'index']);
+Route::get('videos/{id}', [VideoController::class, 'show']);
+Route::get('/videos/{id}/metadata', [VideoController::class, 'getMetadata'])->name('video.metadata');
+Route::get('/videos/{id}/stream', [VideoController::class, 'streamVideo'])->name('video.stream');
+
 
 // Protected routes (requires authentication)
 Route::middleware('auth:api')->group(function () {

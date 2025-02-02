@@ -12,9 +12,7 @@ const fetchVideos = async () => {
 };
 
 // Delete video by ID
-const deleteVideo = async (id) => {
-    await axios.delete(`http://localhost:8000/api/videos/${id}`);
-};
+
 
 const VideoBrowser = () => {
     const navigate = useNavigate();
@@ -30,14 +28,7 @@ const VideoBrowser = () => {
         queryFn: fetchVideos,
     });
 
-    // Mutation for deleting a video
-    const deleteMutation = useMutation({
-        mutationFn: deleteVideo,
-        onSuccess: () => {
-            // Invalidate the "videos" query to refresh the list
-            queryClient.invalidateQueries(["videos"]);
-        },
-    });
+
 
     // Handle navigation to video player
     const handlePlay = (id) => {
@@ -49,12 +40,8 @@ const VideoBrowser = () => {
         navigate("/upload");
     };
 
-    // Handle delete video
-    const handleDelete = (id) => {
-        if (window.confirm("Are you sure you want to delete this video?")) {
-            deleteMutation.mutate(id);
-        }
-    };
+
+
 
     // Loading and error states
     if (isLoading) {
@@ -115,7 +102,7 @@ const VideoBrowser = () => {
                                 {video.description}
                             </p>
                         </div>
-                        
+
                     </div>
                 ))}
             </div>

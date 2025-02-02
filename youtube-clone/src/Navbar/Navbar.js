@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../utils/auth";
+import GuideButton from "./GuideButton";
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -18,6 +19,9 @@ const Navbar = () => {
         <div className="navbar">
             <nav>
                 <ul>
+                    <li>
+                        <GuideButton />
+                    </li>
                     <li>
                         <Link to="/">Home</Link>
                     </li>
