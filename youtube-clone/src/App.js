@@ -4,8 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Upload from "./upload/Upload";
 import VideoBrowser from "./Browse/VideoBrowser";
 import VPlayer from "./Player/VPlayer";
-import Register from "./Register/Register";
-import Login from "./Login/Login";
+import LoginRegisterHandler from "./Login/LoginRegisterHandler";
 import ProtectedRoute from "./ProtectRoutes/ProtectRoutes"; // Ensure correct import path
 
 import "./App.css";
@@ -17,7 +16,7 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
             <Router>
-                
+
 
                 <Routes>
                     <Route path="/" element={<VideoBrowser />} />
@@ -26,8 +25,8 @@ function App() {
                         element={<ProtectedRoute element={<Upload />} />}
                     />
                     <Route path="/video/:id" element={<VPlayer />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<LoginRegisterHandler defaultView="false"/>} />
+                    <Route path="/login" element={<LoginRegisterHandler defaultView="true"/>} />
                 </Routes>
             </Router>
         </QueryClientProvider>
