@@ -2,22 +2,15 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { isAuthenticated } from "../utils/auth";
 import Sidebar from "../Sidebar/Sidebar";
-import SearchModal from "./SearchModal";
+import SearchButton from "./SearchButton";
+import UserIcon from "./UserIcon";
 
 const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("user");
-        navigate("/login");
-    };
-
     return (
         <>
             <div className="fixed top-0 left-0 w-full bg-white shadow-md dark:bg-gray-900 z-50">
                 <div className="custom-container flex items-center justify-between py-4">
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-6 ml-6">
                         <button
                             onClick={() => setSidebarToggle(!sidebarToggle)}
                             className="text-gray-700 dark:text-white hover:text-gray-900 dark:hover:text-gray-300"
@@ -82,7 +75,8 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
                             Home
                         </Link>
                     </div>
-                    <div className="flex items-center space-x-6">
+                    <SearchButton />
+                    <div className="flex items-center space-x-6 mr-6">
                         {isAuthenticated() ? (
                             <>
                                 <Link
@@ -91,12 +85,8 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
                                 >
                                     Upload Video
                                 </Link>
-                                <button
-                                    onClick={handleLogout}
-                                    className="py-2.5 px-4 text-sm text-white bg-red-500 rounded-lg hover:bg-red-600"
-                                >
-                                    Logout
-                                </button>
+
+                                <UserIcon />
                             </>
                         ) : (
                             <Link

@@ -14,65 +14,98 @@ const VideoBrowser = ({ setFilterOpen }) => {
     const navigate = useNavigate();
     const [sidebarToggle, setSidebarToggle] = useState(false);
 
-    const { data: videos, isLoading, error } = useQuery({
+    const {
+        data: videos,
+        isLoading,
+        error,
+        refetch, // Allow retry on failure
+    } = useQuery({
         queryKey: ["videos"],
         queryFn: fetchVideos,
+        retry: 2, // Automatically retry twice before failing
     });
 
     const handlePlay = (id) => {
         navigate(`/video/${id}`);
     };
 
-    if (isLoading) {
-        return <div>Loading videos...</div>;
-    }
-    if (error) return <div>Error loading videos: {error.message}</div>;
-
     return (
         <div className="flex">
+            {/* Sidebar */}
             <Sidebar sidebarToggle={sidebarToggle} />
+
             <div className={`flex-1 transition-all duration-200 ease-out ${sidebarToggle ? "lg:ml-60" : "ml-0"}`}>
+                {/* Navbar */}
                 <Navbar sidebarToggle={sidebarToggle} setSidebarToggle={setSidebarToggle} />
-                <div className="custom-container mt-16">
-                    <div className="mb-6 relative">
+
+                {/* Main Content */}
+                <div className="custom-container mt-20 pl-3 pr-3">
+                    <div className="mb-4 mt-2 relative">
                         <div className="flex items-center gap-6">
-                            <h1 className="text-2xl font-semibold dark:text-white"></h1>
+                            <h1 className="text-2xl font-semibold dark:text-white">Videos</h1>
                             <div className="flex items-center space-x-8 ml-auto">
+                                {/* Filter Button */}
                                 <button
                                     className="w-full py-2.5 px-4 inline-flex justify-center items-center gap-3 text-sm text-center text-gray-500 rounded-lg hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800"
                                     onClick={() => setFilterOpen(true)}
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
-                                        <use xlinkHref="/static/sprite/sprite.svg#sort-2" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path
+                                            fill="currentColor"
+                                            d="m9.25 22l-.4-3.2q-.325-.125-.612-.3t-.563-.375L4.7 19.375l-2.75-4.75l2.575-1.95Q4.5 12.5 4.5 12.338v-.675q0-.163.025-.338L1.95 9.375l2.75-4.75l2.975 1.25q.275-.2.575-.375t.6-.3l.4-3.2h5.5l.4 3.2q.325.125.613.3t.562.375l2.975-1.25l2.75 4.75l-2.575 1.95q.025.175.025.338v.674q0 .163-.05.338l2.575 1.95l-2.75 4.75l-2.95-1.25q-.275.2-.575.375t-.6.3l-.4 3.2zm2.8-6.5q1.45 0 2.475-1.025T15.55 12t-1.025-2.475T12.05 8.5q-1.475 0-2.488 1.025T8.55 12t1.013 2.475T12.05 15.5"
+                                        />
                                     </svg>
                                     <span>Filter</span>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 xl:grid-cols-6 2xl:grid-cols-8 gap-6">
-                        {videos.length === 0 ? (
-                            <div className="no-videos-container">
-                                <p className="no-videos-message">
-                                    No videos available. Upload your first video now!
-                                </p>
-                            </div>
-                        ) : (
-                            videos.map((video) => (
-                                <div key={video.id} className="video-card" onClick={() => handlePlay(video.id)}>
+
+                    {/* Loading State */}
+                    {isLoading && <div className="text-gray-500">Loading videos...</div>}
+
+                    {/* Error State */}
+                    {error && (
+                        <div className="text-red-500">
+                            Error loading videos: {error.message || "Unknown error"}
+                            <button
+                                onClick={() => refetch()}
+                                className="ml-4 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Video Grid */}
+                    {videos && videos.length > 0 ? (
+                        <div className="sm:grid-cols-3 md:grid-cols-3 grid  xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                            {videos.map((video) => (
+                                <div
+                                    key={video.id}
+                                    className="video-card cursor-pointer transition-transform hover:scale-105"
+                                    onClick={() => handlePlay(video.id)}
+                                >
                                     <img
                                         src={`data:image/jpeg;base64,${video.thumbnail}`}
                                         alt={video.title}
-                                        className="video-thumbnail"
+                                        className="video-thumbnail w-full h-auto rounded-lg shadow-md"
+                                        loading="lazy"
                                     />
-                                    <div className="video-info">
-                                        <h3 className="video-title">{video.title}</h3>
-                                        <p className="video-description">{video.description}</p>
+                                    <div className="video-info p-2">
+                                        <h3 className="video-title font-semibold text-gray-900 dark:text-white">{video.title}</h3>
+                                        <p className="video-description text-gray-600 dark:text-gray-400 text-sm truncate">{video.description}</p>
                                     </div>
                                 </div>
-                            ))
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        !isLoading && (
+                            <div className="no-videos-container flex flex-col items-center text-center mt-10">
+                                <p className="text-lg text-gray-500">No videos available. Upload your first video now!</p>
+                            </div>
+                        )
+                    )}
                 </div>
             </div>
         </div>
