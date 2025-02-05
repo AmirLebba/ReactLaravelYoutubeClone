@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { isAuthenticated } from "../utils/auth";
-
 import { Link, useNavigate } from "react-router-dom";
+import { isAuthenticated } from "../utils/auth";
 
 const UserIcon = () => {
     const [open, setOpen] = useState(false);
@@ -10,19 +9,25 @@ const UserIcon = () => {
 
     // Close dropdown when clicking outside
     useEffect(() => {
-        function handleClickOutside(event) {
+        const handleClickOutside = (event) => {
             if (
                 dropdownRef.current &&
                 !dropdownRef.current.contains(event.target)
             ) {
                 setOpen(false);
             }
-        }
+        };
+
+        // Attach the event listener
         document.addEventListener("mousedown", handleClickOutside);
-        return () =>
+
+        // Cleanup the event listener
+        return () => {
             document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
+    // Handle logout
     const handleLogout = () => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("user");
@@ -46,46 +51,61 @@ const UserIcon = () => {
             {/* Dropdown Menu */}
             {open && (
                 <div className="origin-top-right z-10 absolute top-full mt-3 bg-white py-6 w-56 px-3 left-auto right-0 lg:-mr-1.5 lg:rounded-xl shadow-lg border border-gray-100 text-sm divide-y divide-gray-100 dark:bg-gray-900 dark:border-gray-900">
-                    <div>
-                        <a
-                            className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
-                            href="/profile/admin"
-                        >
-                            My Profile
-                        </a>
-                        <a
-                            className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
-                            href="/profile/admin/history"
-                        >
-                            Watch History
-                        </a>
-                        <a
-                            className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
-                            href="/profile/admin/liked"
-                        >
-                            Liked
-                        </a>
-                        <a
-                            className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
-                            href="/profile/admin/watchlist"
-                        >
-                            Watchlist
-                        </a>
-                        <div className="border-t border-gray-100 dark:border-gray-800/50 mt-4 pt-4"></div>
-                        <a
-                            className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
-                            href="/settings"
-                        >
-                            Settings
-                        </a>
+                    {/* Profile Link */}
+                    <Link
+                        to="/profile"
+                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        onClick={() => setOpen(false)}
+                    >
+                        My Profile
+                    </Link>
 
-                        <button
-                            onClick={handleLogout}
-                            className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
-                        >
-                            Logout
-                        </button>
-                    </div>
+                    {/* Watch History Link */}
+                    <Link
+                        to="/profile/admin/history"
+                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        onClick={() => setOpen(false)}
+                    >
+                        Watch History
+                    </Link>
+
+                    {/* Liked Link */}
+                    <Link
+                        to="/profile/admin/liked"
+                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        onClick={() => setOpen(false)}
+                    >
+                        Liked
+                    </Link>
+
+                    {/* Watchlist Link */}
+                    <Link
+                        to="/profile/admin/watchlist"
+                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        onClick={() => setOpen(false)}
+                    >
+                        Watchlist
+                    </Link>
+
+                    {/* Divider */}
+                    <div className="border-t border-gray-100 dark:border-gray-800/50 mt-4 pt-4"></div>
+
+                    {/* Settings Link */}
+                    <Link
+                        to="/settings"
+                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        onClick={() => setOpen(false)}
+                    >
+                        Settings
+                    </Link>
+
+                    {/* Logout Button */}
+                    <button
+                        onClick={handleLogout}
+                        className="block w-full text-left py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                    >
+                        Logout
+                    </button>
                 </div>
             )}
         </li>

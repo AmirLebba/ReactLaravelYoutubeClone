@@ -5,11 +5,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 use Laravel\Passport\Http\Controllers\AccessTokenController;
 use Laravel\Passport\Http\Controllers\AuthorizationController;
 use Laravel\Passport\Http\Controllers\ApproveAuthorizationController;
 use Laravel\Passport\Http\Controllers\DenyAuthorizationController;
 use Laravel\Passport\Http\Controllers\TransientTokenController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +38,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('videos', [VideoController::class, 'store']);
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
+    Route::get('/profile', [ProfileController::class, 'show']);
 });
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

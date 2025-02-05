@@ -1,104 +1,113 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
-const Sidebar = ({ sidebarToggle }) => {
+const Sidebar = ({ sidebarToggle, compactToggle, onClose }) => {
+    const sidebarRef = useRef(null);
+
+    // Handle click outside the sidebar
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                onClose(); // Close the sidebar
+            }
+        };
+
+        // Attach the event listener
+        document.addEventListener("mousedown", handleClickOutside);
+
+        // Cleanup the event listener
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [onClose]);
+
     return (
         <aside
-            className={`fixed shrink-0 top-16 bottom-0 bg-white dark:bg-gray-950 flex flex-col z-40 transition-all duration-200 ease-out
-                ${
-                    sidebarToggle
-                        ? "w-60 translate-x-0"
-                        : "w-0 -translate-x-full"
-                }
-            `}
+            ref={sidebarRef}
+            className={`fixed shrink-0 top-16 max-h-[calc(100vh-theme(space.16))] min-h-[calc(100vh-theme(space.16))] bottom-0 group left-0 bg-white lg:flex lg:right-auto lg:bottom-0 dark:scrollbar-y flex flex-col z-40 dark:bg-gray-950 w-full lg:w-64 transition-all duration-200 ease-out rtl:left-auto rtl:right-0 ${
+                sidebarToggle ? "translate-x-0" : "-translate-x-full"
+            } ${compactToggle ? "lg:!w-auto group" : ""}`}
         >
-            <div className="flex flex-col overflow-y-auto h-full px-2 lg:px-4 scrollbar-thin scrollbar-thumb-gray-100 dark:scrollbar-thumb-white/10">
-                <a
-                    href="/"
-                    className="px-3 gap-x-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50/70 dark:hover:text-gray-100 dark:hover:bg-gray-900 transition rounded-lg flex items-center"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
+            <div className="flex flex-col overflow-y-auto scrollbar-y h-full px-2 lg:px-4 scrollbar scrollbar-thumb-gray-100 dark:scrollbar-thumb-white/10 scrollbar-thin scrollbar-track-transparent">
+                {/* Navigation Links */}
+                {[
+                    { href: "/browse", icon: "browse", text: "Browse" },
+                    { href: "/trending", icon: "trending", text: "Trending" },
+                    { href: "/top-imdb", icon: "top", text: "Top IMDb" },
+                    { href: "/movies", icon: "movie", text: "Movies" },
+                    { href: "/tv-shows", icon: "tv", text: "TV Shows" },
+                    {
+                        href: "/live-broadcasts",
+                        icon: "broadcast",
+                        text: "Live broadcasts",
+                    },
+                ].map((link, index) => (
+                    <a
+                        key={index}
+                        href={link.href}
+                        className="px-3 gap-x-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50/70 hover:border-primary-500 dark:hover:text-gray-100 dark:hover:bg-gray-900 transition rounded-lg flex items-center"
                     >
-                        <path
-                            fill="currentColor"
-                            fill-opacity="0"
-                            d="M5 8.5l7 -5.5l7 5.5v12.5h-4v-8l-1 -1h-4l-1 1v8h-4v-12.5Z"
-                        >
-                            <animate
-                                fill="freeze"
-                                attributeName="fill-opacity"
-                                begin="1.1s"
-                                dur="0.15s"
-                                values="0;0.3"
-                            />
-                        </path>
-                        <g
-                            fill="none"
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            strokeLinecap="round"
+                            strokeWidth="1.75"
+                            strokeLinejoin="round"
+                            className="w-[22px] h-[22px] !w-6 !h-6"
                             stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
                         >
-                            <path
-                                stroke-dasharray="16"
-                                stroke-dashoffset="16"
-                                d="M4.5 21.5h15"
-                            >
-                                <animate
-                                    fill="freeze"
-                                    attributeName="stroke-dashoffset"
-                                    dur="0.2s"
-                                    values="16;0"
-                                />
-                            </path>
-                            <path
-                                stroke-dasharray="16"
-                                stroke-dashoffset="16"
-                                d="M4.5 21.5v-13.5M19.5 21.5v-13.5"
-                            >
-                                <animate
-                                    fill="freeze"
-                                    attributeName="stroke-dashoffset"
-                                    begin="0.2s"
-                                    dur="0.2s"
-                                    values="16;0"
-                                />
-                            </path>
-                            <path
-                                stroke-dasharray="28"
-                                stroke-dashoffset="28"
-                                d="M2 10l10 -8l10 8"
-                            >
-                                <animate
-                                    fill="freeze"
-                                    attributeName="stroke-dashoffset"
-                                    begin="0.4s"
-                                    dur="0.4s"
-                                    values="28;0"
-                                />
-                            </path>
-                            <path
-                                stroke-dasharray="24"
-                                stroke-dashoffset="24"
-                                d="M9.5 21.5v-9h5v9"
-                            >
-                                <animate
-                                    fill="freeze"
-                                    attributeName="stroke-dashoffset"
-                                    begin="0.7s"
-                                    dur="0.4s"
-                                    values="24;0"
-                                />
-                            </path>
-                        </g>
-                    </svg>
-                    <div className="tracking-tighter whitespace-nowrap flex-1">
-                        Home
-                    </div>
-                </a>
+                            <use
+                                xlinkHref={`http://127.0.0.1:8080/static/sprite/sprite.svg#${link.icon}`}
+                            />
+                        </svg>
+                        <div
+                            className={`tracking-tighter whitespace-nowrap flex-1 line-clamp-1 ${
+                                compactToggle ? "lg:hidden" : "block"
+                            }`}
+                        >
+                            {link.text}
+                        </div>
+                    </a>
+                ))}
+
+                {/* Divider */}
+                <div className="border-t border-gray-100 dark:border-gray-900/70 mx-2 my-6"></div>
+
+                {/* Additional Links */}
+                {[
+                    { href: "/request", icon: "refresh", text: "Request" },
+                    {
+                        href: "/collections",
+                        icon: "collection",
+                        text: "Collections",
+                    },
+                    { href: "/peoples", icon: "people", text: "Peoples" },
+                    { href: "/blog", icon: "blog", text: "Blog" },
+                ].map((link, index) => (
+                    <a
+                        key={index}
+                        href={link.href}
+                        className="px-3 gap-x-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 hover:bg-gray-50/70 hover:border-primary-500 dark:hover:text-gray-100 dark:hover:bg-gray-900 transition rounded-lg flex items-center"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            strokeLinecap="round"
+                            strokeWidth="1.75"
+                            strokeLinejoin="round"
+                            className="w-[22px] h-[22px] !w-6 !h-6"
+                            stroke="currentColor"
+                        >
+                            <use
+                                xlinkHref={`http://127.0.0.1:8080/static/sprite/sprite.svg#${link.icon}`}
+                            />
+                        </svg>
+                        <div
+                            className={`tracking-tighter whitespace-nowrap flex-1 line-clamp-1 ${
+                                compactToggle ? "lg:hidden" : "block"
+                            }`}
+                        >
+                            {link.text}
+                        </div>
+                    </a>
+                ))}
             </div>
         </aside>
     );
