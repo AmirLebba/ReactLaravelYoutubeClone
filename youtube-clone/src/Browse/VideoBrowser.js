@@ -7,6 +7,7 @@ import Sidebar from "../Sidebar/Sidebar";
 
 const fetchVideos = async () => {
     const response = await axios.get("http://localhost:8000/api/videos");
+    console.log(response.data);
     return response.data;
 };
 
@@ -103,11 +104,7 @@ const VideoBrowser = ({ setFilterOpen }) => {
                     {/* Video Grid */}
                     {videos && videos.length > 0 ? (
                         <>
-                            <div className="heading text-center font-bold text-2xl m-5 text-gray-100">
-                                Full Responsive Video Cards
-                            </div>
-
-                            <div className="holder mx-auto w-10/12 grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
+                            <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
                                 {videos.map((video) => (
                                     <div
                                         key={video.id}
@@ -127,7 +124,6 @@ const VideoBrowser = ({ setFilterOpen }) => {
                                             <span className="mr-1 p-1 px-2 font-bold">
                                                 {video.views} views
                                             </span>
-
                                         </div>
                                         <div className="desc p-4 text-gray-800">
                                             <a
@@ -136,7 +132,6 @@ const VideoBrowser = ({ setFilterOpen }) => {
                                             >
                                                 {video.title}
                                             </a>
-
                                         </div>
                                     </div>
                                 ))}

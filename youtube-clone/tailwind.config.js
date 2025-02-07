@@ -4,6 +4,8 @@ module.exports = {
     theme: {
         extend: {
             colors: {
+                "secondary-dark": "#4A5568", // Example color
+                "secondary-border": "#718096", // Example color
                 gray: {
                     50: "#FAFAFA",
                     100: "#F4F4F5",
@@ -14,7 +16,6 @@ module.exports = {
                     600: "#52525B",
                     700: "#3F3F46",
                     800: "#27272A",
-                   
                 },
                 primary: {
                     500: "#8B5CF6",

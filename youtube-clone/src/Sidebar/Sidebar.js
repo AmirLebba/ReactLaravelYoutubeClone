@@ -3,22 +3,7 @@ import React, { useEffect, useRef } from "react";
 const Sidebar = ({ sidebarToggle, compactToggle, onClose }) => {
     const sidebarRef = useRef(null);
 
-    // Handle click outside the sidebar
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-                onClose(); // Close the sidebar
-            }
-        };
-
-        // Attach the event listener
-        document.addEventListener("mousedown", handleClickOutside);
-
-        // Cleanup the event listener
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [onClose]);
+    
 
     return (
         <aside
@@ -54,9 +39,7 @@ const Sidebar = ({ sidebarToggle, compactToggle, onClose }) => {
                             className="w-[22px] h-[22px] !w-6 !h-6"
                             stroke="currentColor"
                         >
-                            <use
-                                xlinkHref={`http://127.0.0.1:8080/static/sprite/sprite.svg#${link.icon}`}
-                            />
+                            <use xlinkHref={``} />
                         </svg>
                         <div
                             className={`tracking-tighter whitespace-nowrap flex-1 line-clamp-1 ${
@@ -95,9 +78,7 @@ const Sidebar = ({ sidebarToggle, compactToggle, onClose }) => {
                             className="w-[22px] h-[22px] !w-6 !h-6"
                             stroke="currentColor"
                         >
-                            <use
-                                xlinkHref={`http://127.0.0.1:8080/static/sprite/sprite.svg#${link.icon}`}
-                            />
+                            <use xlinkHref={``} />
                         </svg>
                         <div
                             className={`tracking-tighter whitespace-nowrap flex-1 line-clamp-1 ${
