@@ -110,24 +110,35 @@ class VideoController extends Controller
             'thumbnail' => 'nullable|image|max:2048',
         ]);
 
-        $path = $request->file('video')->store('videos', 'public');
+        // Store original video
+        $originalPath = $request->file('video')->store('videos', 'public');
         $thumbnailPath = $request->file('thumbnail')
             ? $request->file('thumbnail')->store('thumbnails', 'public')
             : null;
 
-        // Calculate video duration
+        // Convert video to WebM format
+        $webmPath = str_replace(['videos/', '.mp4', '.mov', '.avi'], ['videos/', '.webm'], $originalPath);
         $ffmpeg = FFMpeg\FFMpeg::create();
-        $videoFile = $ffmpeg->open(Storage::path("public/$path"));
+
+        try {
+            $videoFile = $ffmpeg->open(Storage::path("public/$originalPath"));
+            $videoFile->save(new FFMpeg\Format\Video\WebM(), Storage::path("public/$webmPath"));
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to convert video: ' . $e->getMessage()], 500);
+        }
+
+        // Get video duration
         $durationInSeconds = $videoFile->getStreams()->videos()->first()->get('duration');
         $duration = gmdate('H:i:s', $durationInSeconds);
 
+        // Save video metadata to the database
         $video = Video::create([
             'title' => $validated['title'] ?? null,
             'description' => $validated['description'] ?? null,
-            'url' => $path,
+            'url' => $webmPath, // Store the WebM version in the database
             'thumbnail' => $thumbnailPath,
             'user_id' => Auth::id(),
-            'publisher_name' => Auth::user()->name, // Set publisher name
+            'publisher_name' => Auth::user()->name,
             'duration' => $duration,
         ]);
 

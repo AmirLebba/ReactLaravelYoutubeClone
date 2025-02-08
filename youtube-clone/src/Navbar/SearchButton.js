@@ -15,7 +15,7 @@ const SearchButton = () => {
     return (
         <>
             {/* Search Button */}
-            <div className="hidden lg:block max-w-sm xl:max-w-xl w-full absolute left-1/2 -translate-x-1/2">
+            <div className=" lg:block max-w-sm xl:max-w-xl w-full absolute left-1/2 -translate-x-1/2">
                 <button
                     type="button"
                     className="hidden sm:flex items-center w-full text-left space-x-5 px-6 py-3.5 bg-gray-100 hover:bg-gray-200/50 rounded-full text-gray-400 dark:bg-gray-800/70 dark:hover:bg-gray-900 transition-all duration-300 text-sm dark:text-gray-300/40"

@@ -54,7 +54,7 @@ const VideoBrowser = ({ setFilterOpen }) => {
 
                 {/* Main Content */}
                 <div className="custom-container mt-20 pl-3 pr-3">
-                    <div className="mb-4 mt-2 relative">
+                    <div className="mb-4 mt-2 ">
                         <div className="flex items-center gap-6">
                             <h1 className="text-2xl font-semibold dark:text-white">
                                 Videos
@@ -62,7 +62,7 @@ const VideoBrowser = ({ setFilterOpen }) => {
                             <div className="flex items-center space-x-8 ml-auto">
                                 {/* Filter Button */}
                                 <button
-                                    className="w-full py-2.5 px-4 inline-flex justify-center items-center gap-3 text-sm text-center text-gray-500 rounded-lg hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800"
+                                    className="z-2 w-full py-2.5 px-4 inline-flex justify-center items-center gap-3 text-sm text-center text-gray-500 rounded-lg hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800"
                                     onClick={() => setFilterOpen(true)}
                                 >
                                     <svg
@@ -84,12 +84,14 @@ const VideoBrowser = ({ setFilterOpen }) => {
 
                     {/* Loading State */}
                     {isLoading && (
-                        <div className="text-gray-500">Loading videos...</div>
+                        <div className="text-gray-500 flex justify-center">
+                            Loading videos...
+                        </div>
                     )}
 
                     {/* Error State */}
                     {error && (
-                        <div className="text-red-500">
+                        <div className="text-gray-500 flex justify-center">
                             Error loading videos:{" "}
                             {error.message || "Unknown error"}
                             <button
@@ -103,40 +105,54 @@ const VideoBrowser = ({ setFilterOpen }) => {
 
                     {/* Video Grid */}
                     {videos && videos.length > 0 ? (
-                        <>
-                            <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
-                                {videos.map((video) => (
-                                    <div
-                                        key={video.id}
-                                        className="each mb-10 m-2 shadow-lg border-gray-800 bg-gray-100 relative"
+                        <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
+                            {videos.map((video) => (
+                                <div
+                                    key={video.id}
+                                    className="each mb-10 m-2 shadow-lg border-gray-800 bg-gray-100 rounded-lg"
+                                >
+                                    <a
+                                        href={`/video/${video.id}`}
+                                        className="block relative"
                                     >
-                                        <img
-                                            src={`data:image/jpeg;base64,${video.thumbnail}`}
-                                            alt={video.title}
-                                            className="video-thumbnail w-full h-auto rounded-lg shadow-md"
-                                            loading="lazy"
+                                        <video
+                                            src={video.url} // Ensure this is a playable video URL
+                                            poster={`data:image/jpeg;base64,${video.thumbnail}`}
+                                            className="video-thumbnail w-full rounded-t-lg shadow-md"
+                                            preload="metadata"
+                                            muted
+                                            loop
+                                            playsInline
+                                            onMouseEnter={(e) =>
+                                                e.target.play()
+                                            }
+                                            onMouseLeave={(e) => {
+                                                e.target.pause();
+                                                e.target.currentTime = 0;
+                                            }}
                                         />
-
-                                        <div className="badge absolute top-0 right-0 bg-red-500 m-1 text-gray-200 p-1 px-2 text-xs font-bold rounded">
-                                            {video.duration}
-                                        </div>
-                                        <div className="info-box text-xs flex p-1 font-semibold text-gray-500 bg-gray-300">
-                                            <span className="mr-1 p-1 px-2 font-bold">
-                                                {video.views} views
-                                            </span>
-                                        </div>
-                                        <div className="desc p-4 text-gray-800">
-                                            <a
-                                                href={`/video/${video.id}`}
-                                                className="title font-bold block cursor-pointer hover:underline"
-                                            >
-                                                {video.title}
-                                            </a>
-                                        </div>
+                                        {video.duration && (
+                                            <div className="absolute bottom-2 right-2 bg-red-500 text-gray-200 p-1 px-2 text-xs font-bold rounded">
+                                                {video.duration}
+                                            </div>
+                                        )}
+                                    </a>
+                                    <div className="info-box text-xs flex p-1 font-semibold text-gray-500 bg-gray-300">
+                                        <span className="mr-1 p-1 px-2 font-bold">
+                                            {video.views} views
+                                        </span>
                                     </div>
-                                ))}
-                            </div>
-                        </>
+                                    <div className="desc p-4 text-gray-800">
+                                        <a
+                                            href={`/video/${video.id}`}
+                                            className="title font-bold block cursor-pointer hover:underline"
+                                        >
+                                            {video.title}
+                                        </a>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     ) : (
                         !isLoading && (
                             <div className="no-videos-container flex flex-col items-center text-center mt-10">

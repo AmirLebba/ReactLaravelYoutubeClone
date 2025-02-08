@@ -35,7 +35,7 @@ const UserIcon = () => {
     };
 
     return (
-        <li className="relative inline-flex mx-auto" ref={dropdownRef}>
+        <li className=" relative inline-flex mx-auto" ref={dropdownRef}>
             {/* Button to toggle dropdown */}
             <button
                 className="inline-flex justify-center items-center group"
@@ -50,11 +50,11 @@ const UserIcon = () => {
 
             {/* Dropdown Menu */}
             {open && (
-                <div className="origin-top-right z-10 absolute top-full mt-3 bg-white py-6 w-56 px-3 left-auto right-0 lg:-mr-1.5 lg:rounded-xl shadow-lg border border-gray-100 text-sm divide-y divide-gray-100 dark:bg-gray-900 dark:border-gray-900">
+                <div className="origin-top-right absolute top-full mt-3 bg-white py-6 w-56 px-3 left-auto right-0 lg:-mr-1.5 lg:rounded-xl shadow-lg border border-gray-100 text-sm divide-y divide-gray-100 dark:bg-gray-900 dark:border-gray-900 z-50">
                     {/* Profile Link */}
                     <Link
                         to="/profile"
-                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        className="z-2025 block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
                         onClick={() => setOpen(false)}
                     >
                         My Profile
@@ -63,7 +63,7 @@ const UserIcon = () => {
                     {/* Watch History Link */}
                     <Link
                         to="/profile/admin/history"
-                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        className="z-2025 block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
                         onClick={() => setOpen(false)}
                     >
                         Watch History
@@ -72,7 +72,7 @@ const UserIcon = () => {
                     {/* Liked Link */}
                     <Link
                         to="/profile/admin/liked"
-                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        className="z-2025 block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
                         onClick={() => setOpen(false)}
                     >
                         Liked
@@ -81,19 +81,17 @@ const UserIcon = () => {
                     {/* Watchlist Link */}
                     <Link
                         to="/profile/admin/watchlist"
-                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        className="z-2025 block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
                         onClick={() => setOpen(false)}
                     >
                         Watchlist
                     </Link>
 
-                    {/* Divider */}
-                    <div className="border-t border-gray-100 dark:border-gray-800/50 mt-4 pt-4"></div>
-
+                   
                     {/* Settings Link */}
                     <Link
                         to="/settings"
-                        className="block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        className="z-2025 block py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
                         onClick={() => setOpen(false)}
                     >
                         Settings
@@ -102,7 +100,7 @@ const UserIcon = () => {
                     {/* Logout Button */}
                     <button
                         onClick={handleLogout}
-                        className="block w-full text-left py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
+                        className="z-2025 block w-full text-left py-2.5 px-6 text-sm text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-700/50"
                     >
                         Logout
                     </button>

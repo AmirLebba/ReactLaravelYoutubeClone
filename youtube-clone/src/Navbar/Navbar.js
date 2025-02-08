@@ -8,10 +8,9 @@ const Navbar = ({ sidebarToggle, setSidebarToggle }) => {
     const handleSidebarToggle = () => {
         setSidebarToggle((prev) => !prev);
     };
-    
 
     return (
-        <div className="fixed top-0 left-0 w-full bg-white shadow-md dark:bg-gray-900 z-30">
+        <div className="fixed top-0 left-0 w-full bg-white shadow-md dark:bg-gray-900 z-25">
             <div className="custom-container flex items-center justify-between py-4">
                 <div className="flex items-center gap-6 ml-6">
                     {/* Sidebar Toggle Buttons */}
