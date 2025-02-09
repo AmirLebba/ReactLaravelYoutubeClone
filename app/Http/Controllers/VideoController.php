@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Video;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Jobs\ProcessVideo;
+
 
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use FFMpeg;
@@ -32,21 +34,26 @@ class VideoController extends Controller
     {
         $video = Video::findOrFail($id);
 
+        // Ensure the thumbnail URL is properly formatted
+        $thumbnailUrl = $video->thumbnail
+            ? asset(Storage::url($video->thumbnail)) // Ensure full URL
+            : asset('images/default-thumbnail.jpg');
+
         // Provide metadata
         return response()->json([
             'id' => $video->id,
             'title' => $video->title,
             'description' => $video->description,
             'url' => route('video.stream', ['id' => $video->id]), // Link to the video streaming endpoint
-            'thumbnail' => $video->thumbnail
-                ? Storage::url($video->thumbnail)
-                : asset('images/default-thumbnail.jpg'),
+            'thumbnail' => $thumbnailUrl,
             'publisher_name' => $video->publisher_name,
             'views' => $video->views,
             'duration' => $video->duration,
             'published_time' => Carbon::parse($video->created_at)->diffForHumans(),
         ]);
     }
+
+
     public function streamVideo($id)
     {
         $video = Video::findOrFail($id);
@@ -101,47 +108,39 @@ class VideoController extends Controller
 
 
 
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'video' => 'required|file|mimes:mp4,mov,avi|max:102400',
-            'title' => 'nullable|string',
-            'description' => 'nullable|string',
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:5000',
             'thumbnail' => 'nullable|image|max:2048',
         ]);
 
-        // Store original video
-        $originalPath = $request->file('video')->store('videos', 'public');
+        // Store files securely
+        $path = $request->file('video')->store('videos', 'private');
         $thumbnailPath = $request->file('thumbnail')
-            ? $request->file('thumbnail')->store('thumbnails', 'public')
+            ? $request->file('thumbnail')->store('thumbnails', 'private')
             : null;
 
-        // Convert video to WebM format
-        $webmPath = str_replace(['videos/', '.mp4', '.mov', '.avi'], ['videos/', '.webm'], $originalPath);
-        $ffmpeg = FFMpeg\FFMpeg::create();
-
-        try {
-            $videoFile = $ffmpeg->open(Storage::path("public/$originalPath"));
-            $videoFile->save(new FFMpeg\Format\Video\WebM(), Storage::path("public/$webmPath"));
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to convert video: ' . $e->getMessage()], 500);
-        }
-
-        // Get video duration
-        $durationInSeconds = $videoFile->getStreams()->videos()->first()->get('duration');
-        $duration = gmdate('H:i:s', $durationInSeconds);
-
-        // Save video metadata to the database
+        // Create video record
         $video = Video::create([
             'title' => $validated['title'] ?? null,
             'description' => $validated['description'] ?? null,
-            'url' => $webmPath, // Store the WebM version in the database
+            'url' => $path,
             'thumbnail' => $thumbnailPath,
             'user_id' => Auth::id(),
             'publisher_name' => Auth::user()->name,
-            'duration' => $duration,
+            'duration' => null, // Processed later
         ]);
 
-        return response()->json($video, 201);
+        // Dispatch background job for processing
+        ProcessVideo::dispatch($video);
+
+        return response()->json([
+            'message' => 'Video uploaded successfully! Processing in the background...',
+            'video' => $video
+        ], 201);
     }
 }

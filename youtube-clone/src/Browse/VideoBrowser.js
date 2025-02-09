@@ -15,6 +15,7 @@ const VideoBrowser = ({ setFilterOpen }) => {
     const navigate = useNavigate();
     const [sidebarToggle, setSidebarToggle] = useState(false);
     const [compactToggle, setCompactToggle] = useState(false);
+    const [hoveredVideo, setHoveredVideo] = useState(null);
 
     const {
         data: videos,
@@ -29,6 +30,30 @@ const VideoBrowser = ({ setFilterOpen }) => {
 
     const handlePlay = (id) => {
         navigate(`/video/${id}`);
+    };
+
+    const handleMouseEnter = async (id) => {
+        try {
+            const response = await fetch(
+                `http://localhost:8000/api/videos/${id}/metadata`
+            );
+            if (!response.ok) throw new Error("Failed to fetch metadata");
+
+            const metadata = await response.json();
+            setHoveredVideo((prev) => ({
+                ...prev,
+                [id]: metadata.url, // Store the video URL
+            }));
+        } catch (error) {
+            console.error("Error fetching video metadata:", error);
+        }
+    };
+
+    const handleMouseLeave = (id) => {
+        setHoveredVideo((prev) => ({
+            ...prev,
+            [id]: null, // Remove the video on mouse leave
+        }));
     };
 
     return (
@@ -109,34 +134,35 @@ const VideoBrowser = ({ setFilterOpen }) => {
                             {videos.map((video) => (
                                 <div
                                     key={video.id}
-                                    className="each mb-10 m-2 shadow-lg border-gray-800 bg-gray-100 rounded-lg"
+                                    className="each mb-10 m-2 shadow-lg border-gray-800 bg-gray-100"
+                                    onMouseEnter={() =>
+                                        handleMouseEnter(video.id)
+                                    }
+                                    onMouseLeave={() =>
+                                        handleMouseLeave(video.id)
+                                    }
                                 >
-                                    <a
-                                        href={`/video/${video.id}`}
-                                        className="block relative"
-                                    >
-                                        <video
-                                            src={video.url} // Ensure this is a playable video URL
-                                            poster={`data:image/jpeg;base64,${video.thumbnail}`}
-                                            className="video-thumbnail w-full rounded-t-lg shadow-md"
-                                            preload="metadata"
-                                            muted
-                                            loop
-                                            playsInline
-                                            onMouseEnter={(e) =>
-                                                e.target.play()
-                                            }
-                                            onMouseLeave={(e) => {
-                                                e.target.pause();
-                                                e.target.currentTime = 0;
-                                            }}
-                                        />
-                                        {video.duration && (
-                                            <div className="absolute bottom-2 right-2 bg-red-500 text-gray-200 p-1 px-2 text-xs font-bold rounded">
-                                                {video.duration}
-                                            </div>
+                                    <div className="relative">
+                                        {hoveredVideo?.[video.id] ? (
+                                            <video
+                                                src={hoveredVideo[video.id]}
+                                                className="video-thumbnail w-full h-auto rounded-lg shadow-md"
+                                                autoPlay
+                                                muted
+                                                loop
+                                                playsInline
+                                            />
+                                        ) : (
+                                            <img
+                                                src={`data:image/jpeg;base64,${video.thumbnail}`}
+                                                alt={video.title}
+                                                className="w-full h-auto rounded-lg shadow-md"
+                                            />
                                         )}
-                                    </a>
+                                        <div className="absolute bottom-1 right-1 bg-red-500 text-gray-200 p-1 text-xs font-bold rounded">
+                                            {video.duration}
+                                        </div>
+                                    </div>
                                     <div className="info-box text-xs flex p-1 font-semibold text-gray-500 bg-gray-300">
                                         <span className="mr-1 p-1 px-2 font-bold">
                                             {video.views} views
@@ -158,7 +184,13 @@ const VideoBrowser = ({ setFilterOpen }) => {
                             <div className="no-videos-container flex flex-col items-center text-center mt-10">
                                 <p className="text-lg text-gray-500">
                                     No videos available. Upload your first video
-                                    now!
+                                    <a
+                                        className="text-blue-500 "
+                                        href="/upload"
+                                    >
+                                        {" "}
+                                        now !
+                                    </a>
                                 </p>
                             </div>
                         )
