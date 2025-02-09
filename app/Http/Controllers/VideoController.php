@@ -6,23 +6,20 @@ use Illuminate\Http\Request;
 use App\Models\Video;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Jobs\ProcessVideo;
-
-
-use Symfony\Component\HttpFoundation\StreamedResponse;
-use FFMpeg;
 use Carbon\Carbon;
-
 
 class VideoController extends Controller
 {
     public function index()
     {
         $videos = Video::all()->map(function ($video) {
-            if ($video->thumbnail && Storage::exists("public/{$video->thumbnail}")) {
-                $video->thumbnail = base64_encode(Storage::get("public/{$video->thumbnail}"));
+            // Ensure thumbnail exists and provide a fallback
+            if ($video->thumbnail && Storage::exists("private/{$video->thumbnail}")) {
+                $video->thumbnail = asset(Storage::url($video->thumbnail));
             } else {
-                $video->thumbnail = null; // Default if no thumbnail exists
+                $video->thumbnail = asset('images/default-thumbnail.jpg');
             }
             return $video;
         });
@@ -34,18 +31,15 @@ class VideoController extends Controller
     {
         $video = Video::findOrFail($id);
 
-        // Ensure the thumbnail URL is properly formatted
-        $thumbnailUrl = $video->thumbnail
-            ? asset(Storage::url($video->thumbnail)) // Ensure full URL
-            : asset('images/default-thumbnail.jpg');
+        // Ensure URL supports multiple resolutions
+        $videoUrls = json_decode($video->url, true);
 
-        // Provide metadata
         return response()->json([
             'id' => $video->id,
             'title' => $video->title,
             'description' => $video->description,
-            'url' => route('video.stream', ['id' => $video->id]), // Link to the video streaming endpoint
-            'thumbnail' => $thumbnailUrl,
+            'video_urls' => $videoUrls, // Array of resolutions
+            'thumbnail' => asset(Storage::url($video->thumbnail)),
             'publisher_name' => $video->publisher_name,
             'views' => $video->views,
             'duration' => $video->duration,
@@ -53,22 +47,26 @@ class VideoController extends Controller
         ]);
     }
 
-
-    public function streamVideo($id)
+    public function streamVideo($id, $resolution = '720p')
     {
         $video = Video::findOrFail($id);
 
         // Increment views only when streaming
         $video->increment('views');
 
-        // Serve the video file directly
-        $filePath = $video->url; // Assuming 'url' stores the video path in the 'public' disk
+        // Get correct resolution URL
+        $videoUrls = json_decode($video->url, true);
+        if (!isset($videoUrls[$resolution])) {
+            return response()->json(['error' => 'Requested resolution not available'], 400);
+        }
 
-        if (!Storage::exists("public/$filePath")) {
+        $filePath = $videoUrls[$resolution];
+
+        if (!Storage::disk('local')->exists($filePath)) {
             return response()->json(['error' => 'Video file not found'], 404);
         }
 
-        $path = Storage::path("public/$filePath");
+        $path = Storage::disk('local')->path($filePath);
         $size = filesize($path);
         $mimeType = mime_content_type($path);
 
@@ -78,36 +76,10 @@ class VideoController extends Controller
             'Content-Length' => $size,
         ];
 
-        if (isset($_SERVER['HTTP_RANGE'])) {
-            $range = $_SERVER['HTTP_RANGE'];
-            list($start, $end) = explode('-', str_replace('bytes=', '', $range));
-
-            $start = intval($start);
-            $end = $end ? intval($end) : ($size - 1);
-
-            $length = $end - $start + 1;
-
-            $headers['Content-Range'] = "bytes $start-$end/$size";
-            $headers['Content-Length'] = $length;
-
-            $stream = fopen($path, 'rb');
-            fseek($stream, $start);
-
-            return response()->stream(function () use ($stream, $length) {
-                echo fread($stream, $length);
-                fclose($stream);
-            }, 206, $headers);
-        }
-
         return response()->stream(function () use ($path) {
             readfile($path);
         }, 200, $headers);
     }
-
-
-
-
-
 
     public function store(Request $request)
     {
@@ -115,21 +87,17 @@ class VideoController extends Controller
             'video' => 'required|file|mimes:mp4,mov,avi|max:102400',
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:5000',
-            'thumbnail' => 'nullable|image|max:2048',
         ]);
 
-        // Store files securely
-        $path = $request->file('video')->store('videos', 'private');
-        $thumbnailPath = $request->file('thumbnail')
-            ? $request->file('thumbnail')->store('thumbnails', 'private')
-            : null;
+        // Store video in private storage
+        $path = $request->file('video')->store('videos', 'local');
 
         // Create video record
         $video = Video::create([
             'title' => $validated['title'] ?? null,
             'description' => $validated['description'] ?? null,
-            'url' => $path,
-            'thumbnail' => $thumbnailPath,
+            'url' => $path, // Will be replaced by JSON object after processing
+            'thumbnail' => null, // Set after processing
             'user_id' => Auth::id(),
             'publisher_name' => Auth::user()->name,
             'duration' => null, // Processed later

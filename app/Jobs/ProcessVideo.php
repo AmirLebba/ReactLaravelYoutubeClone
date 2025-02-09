@@ -28,8 +28,9 @@ class ProcessVideo implements ShouldQueue
     public function handle()
     {
         $disk = Storage::disk('local'); // Private Storage
-        $originalPath = "videos/{$this->video->url}";
-        $videoPath = storage_path("app/{$originalPath}");
+        $originalPath = "videos/{$this->video->url}"; // Ensure only one "videos/" in path
+        $videoPath = storage_path("app/" . $originalPath);
+
 
         // Initialize FFmpeg
         $ffmpeg = FFMpeg::create();
