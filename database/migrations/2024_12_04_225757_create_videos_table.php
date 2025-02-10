@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Handles unsigned and foreign key constraint
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('url');
+            $table->text('url')->nullable()->change();
             $table->string('thumbnail')->nullable();
             $table->timestamps();
         });

@@ -52,7 +52,7 @@ class ProcessVideo implements ShouldQueue
     public function handle()
     {
         set_time_limit(900); // ⬅️ Ensure PHP allows longer execution time
-        
+
         $video = Video::find($this->videoId);
 
         if (!$video) {
@@ -113,15 +113,17 @@ class ProcessVideo implements ShouldQueue
             $thumbnailFilename = "thumbnails/{$video->id}.jpg";
             $thumbnailPath = storage_path("app/public/{$thumbnailFilename}");
 
-            $videoFile->frame(TimeCode::fromSeconds(3))
-                ->save($thumbnailPath);
+            // Save the frame as a thumbnail
+            $videoFile->frame(TimeCode::fromSeconds(3))->save($thumbnailPath);
 
-            // ✅ Update Database
+            // Compress the image
+            $this->compressImage($thumbnailPath, $thumbnailPath, 75);
+
+            // Update the video record with the thumbnail
             $video->update([
-                'url' => json_encode($videoUrls),
-                'duration' => $formattedDuration,
-                'thumbnail' => $thumbnailFilename,
+                'thumbnail' => $thumbnailFilename, // Store the correct path
             ]);
+
 
             // ✅ Move to Private Folder After Processing
             $privateDisk = Storage::disk('local');

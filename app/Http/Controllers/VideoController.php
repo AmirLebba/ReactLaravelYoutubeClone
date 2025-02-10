@@ -88,7 +88,7 @@ class VideoController extends Controller
         $video = Video::create([
             'title' => $validated['title'] ?? 'Untitled Video',
             'description' => $validated['description'] ?? '',
-            'url' => $path,
+            'url' => '{}',
             'thumbnail' => '/images/default-thumbnail.jpg', // Placeholder until processed
             'user_id' => Auth::id(),
             'publisher_name' => Auth::user()->name,
