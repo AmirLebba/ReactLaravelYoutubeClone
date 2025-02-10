@@ -15,12 +15,10 @@ class VideoController extends Controller
     public function index()
     {
         $videos = Video::all()->map(function ($video) {
-            // Ensure thumbnail exists and provide a fallback
-            if ($video->thumbnail && Storage::exists("private/{$video->thumbnail}")) {
-                $video->thumbnail = asset(Storage::url($video->thumbnail));
-            } else {
-                $video->thumbnail = asset('images/default-thumbnail.jpg');
-            }
+            $video->thumbnail = $video->thumbnail && Storage::exists("local/{$video->thumbnail}")
+                ? asset(Storage::url($video->thumbnail))
+                : asset('images/default-thumbnail.jpg');
+
             return $video;
         });
 
@@ -30,8 +28,6 @@ class VideoController extends Controller
     public function getMetadata($id)
     {
         $video = Video::findOrFail($id);
-
-        // Ensure URL supports multiple resolutions
         $videoUrls = json_decode($video->url, true);
 
         return response()->json([
@@ -50,18 +46,14 @@ class VideoController extends Controller
     public function streamVideo($id, $resolution = '720p')
     {
         $video = Video::findOrFail($id);
-
-        // Increment views only when streaming
         $video->increment('views');
 
-        // Get correct resolution URL
         $videoUrls = json_decode($video->url, true);
         if (!isset($videoUrls[$resolution])) {
             return response()->json(['error' => 'Requested resolution not available'], 400);
         }
 
         $filePath = $videoUrls[$resolution];
-
         if (!Storage::disk('local')->exists($filePath)) {
             return response()->json(['error' => 'Video file not found'], 404);
         }
@@ -89,26 +81,27 @@ class VideoController extends Controller
             'description' => 'nullable|string|max:5000',
         ]);
 
-        // Store video in private storage
-        $path = $request->file('video')->store('videos', 'local');
+        // ✅ 1. Save the video to the public storage
+        $path = $request->file('video')->store('videos', 'public');
 
-        // Create video record
+        // ✅ 2. Create a temporary video record
         $video = Video::create([
-            'title' => $validated['title'] ?? null,
-            'description' => $validated['description'] ?? null,
-            'url' => $path, // Will be replaced by JSON object after processing
-            'thumbnail' => null, // Set after processing
+            'title' => $validated['title'] ?? 'Untitled Video',
+            'description' => $validated['description'] ?? '',
+            'url' => $path,
+            'thumbnail' => '/images/default-thumbnail.jpg', // Placeholder until processed
             'user_id' => Auth::id(),
             'publisher_name' => Auth::user()->name,
-            'duration' => null, // Processed later
+            'duration' => null,  // Will be updated later
         ]);
 
-        // Dispatch background job for processing
-        ProcessVideo::dispatch($video);
+        // ✅ 3. Dispatch the job with the video ID
+        ProcessVideo::dispatch($video->id);
 
+        // ✅ 4. Return a response with the video ID
         return response()->json([
             'message' => 'Video uploaded successfully! Processing in the background...',
-            'video' => $video
+            'video' => $video  // Send the video data to the frontend
         ], 201);
     }
 }

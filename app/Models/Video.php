@@ -12,7 +12,7 @@ class Video extends Model
     protected $fillable = [
         'title',
         'description',
-        'url',
+        'url' => 'array', // Auto-decode JSON when fetching
         'thumbnail',
         'user_id',
         'publisher_name',

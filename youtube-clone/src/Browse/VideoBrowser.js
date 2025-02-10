@@ -154,7 +154,7 @@ const VideoBrowser = ({ setFilterOpen }) => {
                                             />
                                         ) : (
                                             <img
-                                                src={`data:image/jpeg;base64,${video.thumbnail}`}
+                                                src={video.thumbnail}
                                                 alt={video.title}
                                                 className="w-full h-auto rounded-lg shadow-md"
                                             />
