@@ -30,15 +30,19 @@ class VideoController extends Controller
     {
         $video = Video::findOrFail($id);
 
-        // Use the accessor to get the decoded URLs
-        $videoUrls = $video->video_urls;
+        // Decode the URLs
+        $videoUrls = json_decode($video->url, true);
+
+        // Generate the full thumbnail URL
+        $thumbnailUrl = Storage::url($video->thumbnail);
 
         return response()->json([
             'id' => $video->id,
+            'unique_id' => $video->unique_id,
             'title' => $video->title,
             'description' => $video->description,
             'video_urls' => $videoUrls, // Array of resolutions
-            'thumbnail' => Storage::url($video->thumbnail), // Use Storage::url for consistency
+            'thumbnail' => $thumbnailUrl, // Full URL for the thumbnail
             'publisher_name' => $video->publisher_name,
             'views' => $video->views,
             'duration' => $video->duration,
@@ -60,8 +64,8 @@ class VideoController extends Controller
             $video->increment('views');
         }
 
-        // Use the accessor to get the decoded URLs
-        $videoUrls = $video->video_urls;
+        // Decode the URLs
+        $videoUrls = json_decode($video->url, true);
 
         // Check if the requested resolution exists
         if (!isset($videoUrls[$resolution])) {
