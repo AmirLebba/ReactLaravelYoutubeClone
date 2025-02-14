@@ -31,6 +31,7 @@ Route::get('videos', [VideoController::class, 'index']);
 Route::get('videos/{id}', [VideoController::class, 'show']);
 Route::get('/videos/{id}/metadata', [VideoController::class, 'getMetadata'])->name('video.metadata');
 Route::get('/videos/{id}/stream', [VideoController::class, 'streamVideo'])->name('video.stream');
+Route::get('/watch/{uniqueId}', [VideoController::class, 'streamVideo'])->name('watch.video');
 
 
 // Protected routes (requires authentication)

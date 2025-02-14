@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
+            $table->string('unique_id')->unique();
             $table->string('publisher_name')->nullable();
             $table->integer('views')->default(0);
             $table->time('duration')->nullable();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Handles unsigned and foreign key constraint
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('title');
             $table->text('description')->nullable();
-            $table->text('url')->nullable()->change();
+            $table->text('url'); // Use 'text' instead of 'string' for JSON data
             $table->string('thumbnail')->nullable();
             $table->timestamps();
         });

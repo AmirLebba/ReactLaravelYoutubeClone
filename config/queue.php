@@ -40,6 +40,7 @@ return [
             'queue' => 'default',
             'retry_after' => 90,
             'after_commit' => false,
+            'max_jobs' => 1  // 👈 Limit concurrent FFmpeg jobs
         ],
 
         'beanstalkd' => [

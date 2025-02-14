@@ -51,8 +51,9 @@ class ProcessVideo implements ShouldQueue
 
     public function handle()
     {
-        set_time_limit(900); // ⬅️ Ensure PHP allows longer execution time
+        set_time_limit(3600); // 1 hour
 
+        // Fetch the video from the database
         $video = Video::find($this->videoId);
 
         if (!$video) {
@@ -60,21 +61,30 @@ class ProcessVideo implements ShouldQueue
             return;
         }
 
-        $disk = Storage::disk('public');  // ✅ Public disk
+        // Check if the video URL is valid
         $originalPath = $video->url;
-        $videoPath = storage_path("app/public/" . $originalPath);  // ✅ Correct path
-
-        // ✅ Ensure video exists
-        if (!file_exists($videoPath)) {
-            Log::error("FFmpeg: Video file not found at path: " . $videoPath);
+        if (empty($originalPath)) {
+            Log::error("FFmpeg: Video URL is empty for video ID: " . $this->videoId);
             return;
         }
 
+        // Construct the full path to the video file
+        $videoPath = storage_path("app/public/" . $originalPath);
+
+        // Ensure the video file exists
+        if (!Storage::disk('public')->exists($originalPath)) {
+            Log::error("FFmpeg: File not found at path - " . $videoPath);
+            return;
+        }
+
+        Log::info("FFmpeg: Processing file at path - " . $videoPath);
+
         try {
-            $ffmpeg = FFMpeg::create();
+            // Initialize FFmpeg
+            $ffmpeg = FFMpeg::create(['ffmpeg.threads' => 3]); // Limit threads to 3
             $videoFile = $ffmpeg->open($videoPath);
 
-            // ✅ Extract duration
+            // Extract video duration
             $streams = $videoFile->getStreams()->videos();
             if (count($streams) === 0) {
                 Log::error("FFmpeg: No video streams found in file: " . $videoPath);
@@ -84,17 +94,18 @@ class ProcessVideo implements ShouldQueue
             $durationInSeconds = $streams->first()->get('duration');
             $formattedDuration = gmdate("H:i:s", $durationInSeconds);
 
-            // ✅ Process different resolutions
+            // Define resolutions to process
             $resolutions = [
-                '1080p' => ['width' => 1920, 'height' => 1080, 'bitrate' => 2500],
-                '720p'  => ['width' => 1280, 'height' => 720, 'bitrate' => 1500],
-                '480p'  => ['width' => 854, 'height' => 480, 'bitrate' => 800],
+                '1080p' => ['width' => 1920, 'height' => 1080, 'bitrate' => 1900],
+                '720p'  => ['width' => 1280, 'height' => 720, 'bitrate' => 1400],
+                '480p'  => ['width' => 854, 'height' => 480, 'bitrate' => 1000],
             ];
 
-            $videoUrls = [];
+            $videoUrls = []; // Define the array to store processed video URLs
 
+            // Process each resolution
             foreach ($resolutions as $key => $res) {
-                $convertedFilename = "videos/{$video->id}_{$key}.webm";
+                $convertedFilename = "videos/{$video->unique_id}_{$key}.webm";
                 $convertedPath = storage_path("app/public/{$convertedFilename}");
 
                 $format = new WebM();
@@ -109,31 +120,37 @@ class ProcessVideo implements ShouldQueue
                 $videoUrls[$key] = $convertedFilename;
             }
 
-            // ✅ Generate Thumbnail
-            $thumbnailFilename = "thumbnails/{$video->id}.jpg";
+            // Generate and compress thumbnail
+            $thumbnailFilename = "thumbnails/{$video->unique_id}.jpg";
             $thumbnailPath = storage_path("app/public/{$thumbnailFilename}");
 
-            // Save the frame as a thumbnail
             $videoFile->frame(TimeCode::fromSeconds(3))->save($thumbnailPath);
+            $this->compressImage($thumbnailPath, $thumbnailPath, 75); // Ensure this method exists
 
-            // Compress the image
-            $this->compressImage($thumbnailPath, $thumbnailPath, 75);
-
-            // Update the video record with the thumbnail
-            $video->update([
-                'thumbnail' => $thumbnailFilename, // Store the correct path
-            ]);
-
-
-            // ✅ Move to Private Folder After Processing
-            $privateDisk = Storage::disk('local');
-            foreach ($videoUrls as $key => $convertedFile) {
-                $publicDisk = Storage::disk('public');
-                if ($publicDisk->exists($convertedFile)) {
-                    $privateDisk->put($convertedFile, $publicDisk->get($convertedFile));
-                    $publicDisk->delete($convertedFile);
+            // Move processed files to private storage
+            $privateDisk = Storage::disk('private');
+            foreach ($videoUrls as $convertedFile) {
+                if (Storage::disk('public')->exists($convertedFile)) {
+                    $privateDisk->put($convertedFile, Storage::disk('public')->get($convertedFile));
+                    Storage::disk('public')->delete($convertedFile);
                 }
             }
+
+            // Delete the original video file
+            if (Storage::disk('public')->exists($originalPath)) {
+                Storage::disk('public')->delete($originalPath);
+            }
+
+            // Update the video record
+            $video->update([
+                'url' => json_encode([
+                    '1080p' => route('watch.video', ['uniqueId' => $video->unique_id, 'resolution' => '1080p']),
+                    '720p'  => route('watch.video', ['uniqueId' => $video->unique_id, 'resolution' => '720p']),
+                    '480p'  => route('watch.video', ['uniqueId' => $video->unique_id, 'resolution' => '480p']),
+                ]),
+                'duration' => $formattedDuration,
+                'thumbnail' => Storage::url($thumbnailFilename),
+            ]);
 
             Log::info("FFmpeg: Video processing completed for video ID: " . $video->id);
         } catch (\Exception $e) {

@@ -10,9 +10,10 @@ class Video extends Model
     use HasFactory;
 
     protected $fillable = [
+        'unique_id',
         'title',
         'description',
-        'url' => 'array', // Auto-decode JSON when fetching
+        'url',
         'thumbnail',
         'user_id',
         'publisher_name',
@@ -20,4 +21,13 @@ class Video extends Model
         'duration',
     ];
 
+    /**
+     * Decode the 'url' field (stored as JSON) into an array.
+     *
+     * @return array
+     */
+    public function getVideoUrlsAttribute()
+    {
+        return json_decode($this->attributes['url'], true);
+    }
 }

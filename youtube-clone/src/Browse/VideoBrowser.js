@@ -5,55 +5,57 @@ import axios from "axios";
 import Navbar from "../Navbar/Navbar";
 import Sidebar from "../Sidebar/Sidebar";
 
+// Fetch videos from the backend
 const fetchVideos = async () => {
-    const response = await axios.get("http://localhost:8000/api/videos");
-    console.log(response.data);
-    return response.data;
+    try {
+        const response = await axios.get("http://localhost:8000/api/videos");
+        return response.data;
+    } catch (error) {
+        throw new Error("Failed to fetch videos: " + error.message);
+    }
 };
 
+// VideoBrowser Component
 const VideoBrowser = ({ setFilterOpen }) => {
     const navigate = useNavigate();
     const [sidebarToggle, setSidebarToggle] = useState(false);
-    const [compactToggle, setCompactToggle] = useState(false);
-    const [hoveredVideo, setHoveredVideo] = useState(null);
+    const [hoveredVideo, setHoveredVideo] = useState(new Map()); // Use Map for better performance
 
     const {
         data: videos,
         isLoading,
         error,
-        refetch, // Allow retry on failure
+        refetch,
     } = useQuery({
         queryKey: ["videos"],
         queryFn: fetchVideos,
-        retry: 2, // Automatically retry twice before failing
+        retry: 2,
     });
 
+    // Handle video play
     const handlePlay = (id) => {
         navigate(`/video/${id}`);
     };
 
+    // Fetch metadata on hover
     const handleMouseEnter = async (id) => {
-        try {
-            const response = await fetch(
-                `http://localhost:8000/api/videos/${id}/metadata`
-            );
-            if (!response.ok) throw new Error("Failed to fetch metadata");
+        if (hoveredVideo.has(id)) return; // Skip if already fetched
 
-            const metadata = await response.json();
-            setHoveredVideo((prev) => ({
-                ...prev,
-                [id]: metadata.url, // Store the video URL
-            }));
+        try {
+            const response = await axios.get(`http://localhost:8000/api/videos/${id}/metadata`);
+            setHoveredVideo((prev) => new Map(prev).set(id, response.data.url));
         } catch (error) {
             console.error("Error fetching video metadata:", error);
         }
     };
 
+    // Clear metadata on mouse leave
     const handleMouseLeave = (id) => {
-        setHoveredVideo((prev) => ({
-            ...prev,
-            [id]: null, // Remove the video on mouse leave
-        }));
+        setHoveredVideo((prev) => {
+            const newMap = new Map(prev);
+            newMap.delete(id);
+            return newMap;
+        });
     };
 
     return (
@@ -61,16 +63,11 @@ const VideoBrowser = ({ setFilterOpen }) => {
             {/* Sidebar */}
             <Sidebar
                 sidebarToggle={sidebarToggle}
-                compactToggle={compactToggle}
                 onClose={() => setSidebarToggle(false)}
             />
 
             {/* Main Content */}
-            <div
-                className={`flex-1 transition-all duration-200 ease-out ${
-                    sidebarToggle ? "lg:ml-60" : "ml-0"
-                }`}
-            >
+            <div className={`flex-1 transition-all duration-200 ease-out ${sidebarToggle ? "lg:ml-60" : "ml-0"}`}>
                 {/* Navbar */}
                 <Navbar
                     sidebarToggle={sidebarToggle}
@@ -79,11 +76,9 @@ const VideoBrowser = ({ setFilterOpen }) => {
 
                 {/* Main Content */}
                 <div className="custom-container mt-20 pl-3 pr-3">
-                    <div className="mb-4 mt-2 ">
+                    <div className="mb-4 mt-2">
                         <div className="flex items-center gap-6">
-                            <h1 className="text-2xl font-semibold dark:text-white">
-                                Videos
-                            </h1>
+                            <h1 className="text-2xl font-semibold dark:text-white">Videos</h1>
                             <div className="flex items-center space-x-8 ml-auto">
                                 {/* Filter Button */}
                                 <button
@@ -117,8 +112,7 @@ const VideoBrowser = ({ setFilterOpen }) => {
                     {/* Error State */}
                     {error && (
                         <div className="text-gray-500 flex justify-center">
-                            Error loading videos:{" "}
-                            {error.message || "Unknown error"}
+                            Error loading videos: {error.message || "Unknown error"}
                             <button
                                 onClick={() => refetch()}
                                 className="ml-4 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
@@ -135,17 +129,13 @@ const VideoBrowser = ({ setFilterOpen }) => {
                                 <div
                                     key={video.id}
                                     className="each mb-10 m-2 shadow-lg border-gray-800 bg-gray-100"
-                                    onMouseEnter={() =>
-                                        handleMouseEnter(video.id)
-                                    }
-                                    onMouseLeave={() =>
-                                        handleMouseLeave(video.id)
-                                    }
+                                    onMouseEnter={() => handleMouseEnter(video.id)}
+                                    onMouseLeave={() => handleMouseLeave(video.id)}
                                 >
                                     <div className="relative">
-                                        {hoveredVideo?.[video.id] ? (
+                                        {hoveredVideo.get(video.id) ? (
                                             <video
-                                                src={hoveredVideo[video.id]}
+                                                src={hoveredVideo.get(video.id)}
                                                 className="video-thumbnail w-full h-auto rounded-lg shadow-md"
                                                 autoPlay
                                                 muted
@@ -184,10 +174,7 @@ const VideoBrowser = ({ setFilterOpen }) => {
                             <div className="no-videos-container flex flex-col items-center text-center mt-10">
                                 <p className="text-lg text-gray-500">
                                     No videos available. Upload your first video
-                                    <a
-                                        className="text-blue-500 "
-                                        href="/upload"
-                                    >
+                                    <a className="text-blue-500" href="/upload">
                                         {" "}
                                         now !
                                     </a>

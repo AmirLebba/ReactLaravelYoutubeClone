@@ -1,7 +1,5 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-
 import "./Upload.scss";
 
 const Upload = () => {
@@ -15,8 +13,6 @@ const Upload = () => {
 
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
-
-    const navigate = useNavigate();
 
     const handleGenerateThumbnail = () => {
         if (!videoRef.current || !canvasRef.current) {
@@ -97,7 +93,6 @@ const Upload = () => {
 
             setMessage("Video uploaded successfully!");
             resetForm();
-            setTimeout(() => navigate("/"), 2000);
         } catch (error) {
             console.error(
                 "Error response:",
@@ -130,16 +125,21 @@ const Upload = () => {
                             onChange={(e) => setFile(e.target.files[0])}
                             required
                         />
-
                         {file && (
-                            <button
-                                onClick={() => setStep(2)}
-                                disabled={!file}
-                                className="next-button"
-                            >
-                                Next
-                            </button>
+                            <video
+                                ref={videoRef}
+                                src={URL.createObjectURL(file)}
+                                controls
+                                className="video-preview"
+                            />
                         )}
+                        <button
+                            onClick={() => setStep(2)}
+                            disabled={!file}
+                            className="next-button"
+                        >
+                            Next
+                        </button>
                     </div>
                 );
             case 2:
