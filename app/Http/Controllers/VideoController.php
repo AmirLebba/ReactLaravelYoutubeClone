@@ -152,8 +152,8 @@ class VideoController extends Controller
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:5000',
         ], [
-            'video.max' => 'The video file must not exceed 100MB.', // Custom error message
-            'video.mimes' => 'The video file must be of type: mp4, mov, avi.', // Custom error message
+            'video.max' => 'The video file must not exceed 100MB.',
+            'video.mimes' => 'The video file must be of type: mp4, mov, avi.',
         ]);
 
         try {
@@ -175,7 +175,7 @@ class VideoController extends Controller
 
             // Save video details in the database
             $video = Video::create([
-                'unique_id' => $uniqueId, // Store the unique ID
+                'unique_id' => $uniqueId,
                 'title' => $validated['title'] ?? 'Untitled Video',
                 'description' => $validated['description'] ?? '',
                 'url' => $filename, // Store the relative path
@@ -194,7 +194,7 @@ class VideoController extends Controller
             ProcessVideo::dispatch($video->id)->delay(now()->addSeconds(5));
 
             return response()->json([
-                'message' => 'Video uploaded successfully! Processing in the background...',
+                'message' => 'Video uploaded successfully! Processing will begin shortly.',
                 'video' => [
                     'id' => $video->id,
                     'title' => $video->title,
