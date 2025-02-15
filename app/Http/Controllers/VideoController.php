@@ -183,6 +183,7 @@ class VideoController extends Controller
                 'user_id' => Auth::id(),
                 'publisher_name' => Auth::user()->name,
                 'duration' => null, // Will be updated during processing
+                'status' => 'Pending', // Initial status
             ]);
 
             Log::info("Video ID {$video->id} saved in the database.", [
@@ -200,6 +201,7 @@ class VideoController extends Controller
                     'title' => $video->title,
                     'description' => $video->description,
                     'uploaded_at' => $video->created_at,
+                    'status' => $video->status, // Include status in the response
                 ],
             ], 201);
         } catch (\Exception $e) {

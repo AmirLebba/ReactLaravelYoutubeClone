@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
             $table->string('unique_id')->unique();
+           
             $table->string('publisher_name')->nullable();
             $table->integer('views')->default(0);
             $table->time('duration')->nullable();
@@ -23,6 +24,7 @@ return new class extends Migration
             $table->text('url'); // Use 'text' instead of 'string' for JSON data
             $table->string('thumbnail')->nullable();
             $table->timestamps();
+
         });
     }
 
